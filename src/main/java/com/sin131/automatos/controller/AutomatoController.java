@@ -15,18 +15,24 @@ public class AutomatoController {
 
     @PostMapping("convert-afn")
     public AFD sendAfn(@RequestBody AFN afn){
-        return AfnParaAfdConversor.converte(afn);
+        var x=  AfnParaAfdConversor.converte(afn);
+
+        System.out.println(x);
+
+        return x;
     }
 
     private record PalavraRequest(AFN automato, String palavra){}
     @PostMapping("accept-word")
     public Boolean aceitaPalalavraEmAfn(@RequestBody PalavraRequest data){
 
-        return SimuladorDeAceitacao.aceitaPalavra(data.automato,data.palavra);
+       return SimuladorDeAceitacao.aceitaPalavra(data.automato,data.palavra);
+
     }
 
     @PostMapping("minimize")
     public AFD minimizar(@RequestBody AFD afd){
+
         return AFDMinimizador.minimizar(afd);
     }
 

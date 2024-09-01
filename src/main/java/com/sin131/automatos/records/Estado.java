@@ -38,19 +38,44 @@ public record Estado(String nome){
     public static ArrayList<Estado> getListadedestinos(List<Estado> estadosFinais) {
 
         var listaDeDestinosPossiveis = new ArrayList<Estado>();
+
         for (int i = 0; i < estadosFinais.size(); i++) {
             var estadoAtual = estadosFinais.get(i).nome();
 
-            for (int j = i + 1; j < estadosFinais.size(); j++) { // j começa em i+1 para evitar repetição de pares
+            for (int j = i + 1; j < estadosFinais.size(); j++) {
                 var proximoEstado = estadosFinais.get(j).nome();
 
-
-                listaDeDestinosPossiveis.add(new Estado(estadoAtual + proximoEstado));
+                Estado novoEstado = getEstadoConcatenadoSemRepeticao(estadoAtual, proximoEstado);
+                if (!listaDeDestinosPossiveis.contains(novoEstado)) {
+                    listaDeDestinosPossiveis.add(novoEstado);
+                }
             }
-
         }
 
         return listaDeDestinosPossiveis;
+    }
+
+    private static Estado getEstadoConcatenadoSemRepeticao(String estadoAtual, String proximoEstado) {
+        Set<String> conjuntoEstados = new TreeSet<>();
+
+        for (String estado : estadoAtual.split("q")) {
+            if (!estado.isEmpty()) {
+                conjuntoEstados.add("q" + estado);
+            }
+        }
+        for (String estado : proximoEstado.split("q")) {
+            if (!estado.isEmpty()) {
+                conjuntoEstados.add("q" + estado);
+            }
+        }
+
+        StringBuilder estadoConcatenado = new StringBuilder();
+        for (String estado : conjuntoEstados) {
+            estadoConcatenado.append(estado);
+        }
+
+        Estado novoEstado = new Estado(estadoConcatenado.toString());
+        return novoEstado;
     }
 
     public static ArrayList<String> getEstadosNaoMinimzados(List<Transicao> transicoesRefinadas,

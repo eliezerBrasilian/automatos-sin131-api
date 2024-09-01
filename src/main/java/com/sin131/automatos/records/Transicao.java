@@ -70,7 +70,11 @@ public record Transicao(Estado estadoAtual,
         return transicoesFinais;
     }
 
-    public static List<Transicao> getNovasTransicoes(AFD afd, ArrayList<Transicao> transicoes, ArrayList<Estado> listaDeDestinosValidosUnida) {
+    public static List<Transicao> getNovasTransicoes(
+            AFD afd,
+            ArrayList<Transicao> transicoes,
+            ArrayList<Estado> listaDeDestinosValidosUnida) {
+
         var estadosFinaisDestList = new HashSet<String>();
         var transicoesSet = new HashSet<Transicao>();
 
@@ -106,6 +110,8 @@ public record Transicao(Estado estadoAtual,
                                             new Estado(tAtual.estadoDestino.nome())//q2q3q4q5
                                     )
                             );
+                            System.out.println("------------transicoesSet");
+                            System.out.println(transicoesSet);
                         }
                     }
 
@@ -202,11 +208,19 @@ public record Transicao(Estado estadoAtual,
         }
     }
 
-    public static ArrayList<Transicao> getTransicoesDosEstadosNaoMinimizados(ArrayList<String> estadosNaoMinimizados,
-                                                                             List<Transicao> transicoesRefinadas, List<Character> simbolos) {
+    public static ArrayList<Transicao>
+    getTransicoesDosEstadosNaoMinimizados(
+            ArrayList<String> estadosNaoMinimizados,
+            List<Transicao> transicoesRefinadas,
+            List<Character> simbolos) {
+
         var copiaDeTransicoes = new ArrayList<>(transicoesRefinadas);
 
+        System.out.println("---------copiaDeTransicoes");
+        System.out.println(copiaDeTransicoes);
+
         for (String estadoNaoMinimizado: estadosNaoMinimizados){
+            System.out.println("papapapapapap");
             System.out.println("estadoNaoMinimizado " + estadoNaoMinimizado);
             for(Character simbolo: simbolos){
                 System.out.println("simbolo: " + simbolo);
@@ -244,6 +258,4 @@ public record Transicao(Estado estadoAtual,
         }
         return copiaDeTransicoes;
     }
-
-
 };

@@ -258,4 +258,6 @@ public record Transicao(Estado estadoAtual,
         }
         return copiaDeTransicoes;
     }
+
+
 };

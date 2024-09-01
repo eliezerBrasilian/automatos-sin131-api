@@ -33,6 +33,7 @@ public class AutomatoController {
     @PostMapping("minimize")
     public AFD minimizar(@RequestBody AFD afd){
 
+
         return AFDMinimizador.minimizar(afd);
     }
 

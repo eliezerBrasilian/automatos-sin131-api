@@ -1,3 +1,4 @@
+
 package com.sin131.automatos.minimizadores;
 
 import com.sin131.automatos.records.AFD;
@@ -5,82 +6,97 @@ import com.sin131.automatos.records.Estado;
 import com.sin131.automatos.records.Transicao;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static com.sin131.automatos.records.Estado.*;
-import static com.sin131.automatos.records.Transicao.*;
+
 
 public class AFDMinimizador {
 
     public static AFD minimizar(AFD afd) {
-        var estadosFinais = afd.estadosFinais();
+        List<Estado> estados =  afd.conjuntoEstados();
+        List<Estado> estadosFinais = afd.estadosFinais();
+        Set<Estado> estadosNaoFinais = new HashSet<>(estados);
+        estadosNaoFinais.removeAll(estadosFinais);
 
-        var estadosSimples = getEstadosSimples(afd,estadosFinais);
+        Map<Estado, Integer> particao = new HashMap<>();
+        int idParticao = 0;
+        for (Estado estado : estadosNaoFinais) {
+            particao.put(estado, idParticao);
+        }
+        idParticao++;
+        for (Estado estado : estadosFinais) {
+            particao.put(estado, idParticao);
+        }
 
-        var retornoListaDestinosFinaisValidos = getListadedestinos(estadosFinais);
+        boolean houveMudanca;
+        do {
+            houveMudanca = false;
+            Map<Estado, Integer> novaParticao = new HashMap<>();
+            Map<String, Integer> grupos = new HashMap<>();
 
-        var retornoListaDestinosSimplesValidos = getListadedestinos(estadosSimples);
+            for (Estado estado : estados) {
+                StringBuilder grupoIdentificador = new StringBuilder();
+                grupoIdentificador.append(particao.get(estado));
 
-        var listaDeDestinosValidosUnida = getlistaDeDestinosValidos(retornoListaDestinosSimplesValidos,
-                retornoListaDestinosFinaisValidos,estadosFinais,estadosSimples);
+                for (Character simbolo : afd.alfabeto().caracteres()) {
+                    grupoIdentificador.append("-");
 
-        var transicoesSimples =  getTransicoes(afd,estadosSimples);
+                    Optional<Estado> destino = afd.conjuntoTransicoes().stream()
+                            .filter(transicao -> transicao.estadoAtual().equals(estado) && transicao.simboloEntrada().equals(simbolo))
+                            .map(Transicao::estadoDestino)
+                            .findFirst();
 
-        var transicoesFinais = getTransicoes(afd, estadosFinais);
+                    Map<Estado, Integer> finalParticao = particao;
+                    destino.ifPresentOrElse(
+                            destinoEstado -> grupoIdentificador.append(finalParticao.get(destinoEstado)),
+                            () -> grupoIdentificador.append("N")
+                    );
+                }
 
-        var novasTransicoesList = getNovasTransicoes(afd,transicoesFinais,listaDeDestinosValidosUnida);
-        System.out.println("-------novasTransicoesList");
-        System.out.println(novasTransicoesList);
-        var novasTransicoesSimplesList = getNovasTransicoes(afd,transicoesSimples,listaDeDestinosValidosUnida);
 
-        var transicoesRefinadas = new ArrayList<>(
-                getNovasTransicoes(
-                afd, new ArrayList<>(novasTransicoesList),
-                listaDeDestinosValidosUnida));
+                String identificador = grupoIdentificador.toString();
+                if (!grupos.containsKey(identificador)) {
+                    grupos.put(identificador, grupos.size());
+                }
+                novaParticao.put(estado, grupos.get(identificador));
+            }
 
-        System.out.println("------transicoesRefinadas");
-        System.out.println(transicoesRefinadas);
+            if (!novaParticao.equals(particao)) {
+                particao = novaParticao;
+                houveMudanca = true;
+            }
+        } while (houveMudanca);
 
-        var transicoesSimplesRefinadas = new ArrayList<>(getNovasTransicoes(
-                afd, new ArrayList<>(novasTransicoesSimplesList),
-                listaDeDestinosValidosUnida));
+        Map<Integer, Estado> novoEstadoPorGrupo = new HashMap<>();
+        for (Estado estado : estados) {
+            int grupo = particao.get(estado);
+            if (!novoEstadoPorGrupo.containsKey(grupo)) {
+                novoEstadoPorGrupo.put(grupo, new Estado("q" + grupo));
+            }
+        }
 
-        System.out.println("------transicoesSimplesRefinadas");
-        System.out.println(transicoesSimplesRefinadas);
+        Set<Estado> novosEstados = new HashSet<>(novoEstadoPorGrupo.values());
+        Set<Transicao> novasTransicoes = new HashSet<>();
+        Estado novoEstadoInicial = novoEstadoPorGrupo.get(particao.get(afd.estadoInicial()));
+        Map<Estado, Integer> finalParticao1 = particao;
+        Set<Estado> novosEstadosFinais = estadosFinais.stream()
+                .map(estado -> novoEstadoPorGrupo.get(finalParticao1.get(estado)))
+                .collect(Collectors.toSet());
 
-        garanteTransicoesComTodosSimbolos(transicoesRefinadas, novasTransicoesList);
-        garanteTransicoesComTodosSimbolos(transicoesSimplesRefinadas, novasTransicoesSimplesList);
-
-        var novoAfdSemTransicoesMinimizadas = new AFD(
-                afd.conjuntoEstados(),
+        for (Transicao transicao : afd.conjuntoTransicoes()) {
+            Estado origem = novoEstadoPorGrupo.get(particao.get(transicao.estadoAtual()));
+            Estado destino = novoEstadoPorGrupo.get(particao.get(transicao.estadoDestino()));
+            novasTransicoes.add(new Transicao(origem, transicao.simboloEntrada(), destino));
+        }
+        return new AFD(
+                new ArrayList<>(novosEstados),
                 afd.alfabeto(),
-                transicoesRefinadas,
-                afd.estadoInicial(),
-                afd.estadosFinais()
+                new ArrayList<>(novasTransicoes),
+                novoEstadoInicial,
+                new ArrayList<>(novosEstadosFinais)
         );
-
-        adicionandoTransicoesNaoMinimizadas(afd, novoAfdSemTransicoesMinimizadas.conjuntoTransicoes(), novoAfdSemTransicoesMinimizadas);
-
-        System.out.println("Novo afd: " + novoAfdSemTransicoesMinimizadas);
-
-        var estadosNaoMinimizados = getEstadosNaoMinimzados(novoAfdSemTransicoesMinimizadas.conjuntoTransicoes(),afd.conjuntoTransicoes());
-        System.out.println("estadosNaoMinimizados");
-        System.out.println(estadosNaoMinimizados);
-
-        System.out.println("novoAfdSemTransicoesMinimizadas.conjuntoTransicoes()");
-        System.out.println(novoAfdSemTransicoesMinimizadas.conjuntoTransicoes());
-
-        var novoAfdComTransicoesMinimizadas = new AFD(
-                afd.conjuntoEstados(),
-                afd.alfabeto(),
-                novasTransicoesList,
-                afd.estadoInicial(),
-                afd.estadosFinais()
-        );
-
-        System.out.println("novoAfdComTransicoesMinimizadas----------------");
-        System.out.println(novoAfdComTransicoesMinimizadas);
-
-        return novoAfdComTransicoesMinimizadas;
     }
+
 }
+
 

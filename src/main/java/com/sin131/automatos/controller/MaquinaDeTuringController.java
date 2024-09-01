@@ -1,7 +1,7 @@
 package com.sin131.automatos.controller;
 
 import com.sin131.automatos.records.MaquinaDeTuringPar;
-import com.sin131.automatos.records.MaquinaDeTuringPalindromo;
+import com.sin131.automatos.records.MaquinaDeTuringIncremento;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,9 +15,9 @@ public class MaquinaDeTuringController {
         return maquina.processar();
     }
 
-    @PostMapping("palindromo/{numero}")
-    public boolean ehPalindromo(@PathVariable String numero){
-        var maquina = new MaquinaDeTuringPalindromo(numero);
-        return maquina.processar();
+    @PostMapping("valorIncrementado/{numero}")
+    public String valorIncrementado(@PathVariable String numero){
+       var maquina = new MaquinaDeTuringIncremento(numero);
+       return maquina.processar();
     }
 }

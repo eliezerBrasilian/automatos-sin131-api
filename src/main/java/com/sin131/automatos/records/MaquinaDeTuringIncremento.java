@@ -12,9 +12,9 @@ public class MaquinaDeTuringIncremento {
     private String estadoAceitacao;
 
     public MaquinaDeTuringIncremento(String tape) {
-        this.tape = tape + "_"; // Adiciona um delimitador no final
-        this.head = tape.length() - 1; // Começa na última posição válida da palavra
-        this.estadoAtual = "q0"; // Estado inicial
+        this.tape = tape + "_";
+        this.head = tape.length() - 1;
+        this.estadoAtual = "q0";
         this.estadoAceitacao = "qAceito";
         definirTransicoes();
     }
@@ -24,14 +24,14 @@ public class MaquinaDeTuringIncremento {
 
         // Transições da Máquina de Turing para incremento binário
         transicoes.put("q0", new HashMap<>() {{
-            put('0', new Transition("qAceito", '1', 0)); // Troca 0 por 1 e aceita
-            put('1', new Transition("q1", '0', -1)); // Troca 1 por 0 e move à esquerda
-            put('_', new Transition("qAceito", '1', 0)); // Se chegar ao início, adiciona 1 e aceita
+            put('0', new Transition("qAceito", '1', 0));
+            put('1', new Transition("q1", '0', -1));
+            put('_', new Transition("qAceito", '1', 0));
         }});
         transicoes.put("q1", new HashMap<>() {{
-            put('1', new Transition("q1", '0', -1)); // Continua trocando 1 por 0 e movendo à esquerda
-            put('0', new Transition("qAceito", '1', 0)); // Troca 0 por 1 e aceita
-            put('_', new Transition("qAceito", '1', 0)); // Se chegar ao início, adiciona 1 e aceita
+            put('1', new Transition("q1", '0', -1));
+            put('0', new Transition("qAceito", '1', 0));
+            put('_', new Transition("qAceito", '1', 0));
         }});
     }
 
@@ -41,7 +41,7 @@ public class MaquinaDeTuringIncremento {
             Transition transicao = transicoes.get(estadoAtual).get(simboloAtual);
 
             if (transicao == null) {
-                return tape; // Retorna a fita atual se não houver transição
+                return tape;
             }
 
             // Atualiza a fita, o estado e a posição da cabeça
@@ -50,7 +50,7 @@ public class MaquinaDeTuringIncremento {
             head += transicao.movimento;
 
             if (estadoAtual.equals(estadoAceitacao)) {
-                return tape.replace("_", ""); // Retorna a fita sem o delimitador
+                return tape.replace("_", "");
             }
         }
     }
@@ -59,7 +59,7 @@ public class MaquinaDeTuringIncremento {
     private static class Transition {
         String estadoDestino;
         char simboloEscrever;
-        int movimento; // 1 para direita, -1 para esquerda, 0 para não mover
+        int movimento;
 
         Transition(String estadoDestino, char simboloEscrever, int movimento) {
             this.estadoDestino = estadoDestino;

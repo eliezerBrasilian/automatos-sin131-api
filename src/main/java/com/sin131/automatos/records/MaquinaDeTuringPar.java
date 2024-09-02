@@ -12,41 +12,41 @@ public class MaquinaDeTuringPar {
     public MaquinaDeTuringPar(String tape) {
         this.tape = tape + "_";
         this.head = 0;
-        this.estadoAtual = "q_inicio";
+        this.estadoAtual = "estadoInicial";
         definirTransicoes();
     }
 
     private void definirTransicoes() {
         transicoes = new HashMap<>();
 
-        transicoes.put("q_inicio", new HashMap<>() {{
-            put('0', new Transition("q_verifica_fim", '0', 1)); // Move para a direita ao encontrar 0
-            put('1', new Transition("q_verifica_fim", '1', 1)); // Move para a direita ao encontrar 1
-            put('_', new Transition("q_rejeicao", '_', 0)); // Rejeita se fita vazia ou encontra o final sem nada
+        transicoes.put("estadoInicial", new HashMap<>() {{
+            put('0', new Transition("q_verifica_fim", '0', 1));
+            put('1', new Transition("q_verifica_fim", '1', 1));
+            put('_', new Transition("q_rejeicao", '_', 0));
         }});
 
         transicoes.put("q_verifica_fim", new HashMap<>() {{
-            put('0', new Transition("q_verifica_fim", '0', 1)); // Continua para a direita
-            put('1', new Transition("q_verifica_fim", '1', 1)); // Continua para a direita
-            put('_', new Transition("q_verifica_paridade", '_', -1)); // Verifica paridade ao encontrar o final
+            put('0', new Transition("q_verifica_fim", '0', 1));
+            put('1', new Transition("q_verifica_fim", '1', 1));
+            put('_', new Transition("q_verifica_paridade", '_', -1));
         }});
 
 
         transicoes.put("q_verifica_paridade", new HashMap<>() {{
-            put('0', new Transition("q_aceitacao", '0', 0)); // Aceita se o último dígito for 0
-            put('1', new Transition("q_rejeicao", '1', 0)); // Rejeita se o último dígito for 1
+            put('0', new Transition("q_aceitacao", '0', 0));
+            put('1', new Transition("q_rejeicao", '1', 0));
         }});
 
 
         transicoes.put("q_aceitacao", new HashMap<>() {{
-            put('0', new Transition("q_aceitacao", '0', 0)); // Permanece em aceitação
-            put('1', new Transition("q_aceitacao", '1', 0)); // Permanece em aceitação
+            put('0', new Transition("q_aceitacao", '0', 0));
+            put('1', new Transition("q_aceitacao", '1', 0));
         }});
 
 
         transicoes.put("q_rejeicao", new HashMap<>() {{
-            put('0', new Transition("q_rejeicao", '0', 0)); // Permanece em rejeição
-            put('1', new Transition("q_rejeicao", '1', 0)); // Permanece em rejeição
+            put('0', new Transition("q_rejeicao", '0', 0));
+            put('1', new Transition("q_rejeicao", '1', 0));
         }});
     }
 

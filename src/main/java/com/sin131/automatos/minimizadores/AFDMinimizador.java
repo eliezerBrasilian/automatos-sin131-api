@@ -8,8 +8,6 @@ import com.sin131.automatos.records.Transicao;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
-
 public class AFDMinimizador {
 
     public static AFD minimizar(AFD afd) {
